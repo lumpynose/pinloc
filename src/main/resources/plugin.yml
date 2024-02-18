@@ -3,8 +3,8 @@ main: com.objecteffects.pinloc.plugin.PinLoc
 version: 0.0.1-SNAPSHOT
 author: rusty@gmail.com
 commands:
-    pinloc:
-        description: Place a pin in this location.
-        usage: /pinloc
-        permission: PinLoc.basic
-        permission-message: You do not have <permission>
+  pinloc:
+    description: Place a pin at (remember) this location.
+    usage: /pinloc
+    permission: PinLoc.basic
+    permission-message: You do not have <permission>
