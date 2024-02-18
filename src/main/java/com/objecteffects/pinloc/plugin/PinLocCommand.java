@@ -11,7 +11,8 @@ import org.slf4j.LoggerFactory;
 public class PinLocCommand implements CommandExecutor {
 	private final static Logger log = LoggerFactory.getLogger("PinLoc");
 
-	private final JavaPlugin plugin;
+	@SuppressWarnings("unused")
+    private final JavaPlugin plugin;
 
 	public PinLocCommand(JavaPlugin _plugin) {
 		this.plugin = _plugin;

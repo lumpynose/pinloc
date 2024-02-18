@@ -7,121 +7,139 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class H2Db {
-	private final static Logger log = LoggerFactory.getLogger("PinLoc");
+    private final static Logger log = LoggerFactory.getLogger("PinLoc");
 
-	private static JdbcConnectionPool cp = null;
-	private final static String db = "jdbc:h2:";
+    @SuppressWarnings("unused")
+    private final JavaPlugin plugin;
 
-	public void dbSetup(File dataFolder, String dbName) {
-		String fullDbName = dbName(dataFolder, dbName);
+    private JdbcConnectionPool cp = null;
+    private final static String db = "jdbc:h2:";
 
-		fullDbName = fullDbName.concat(";AUTO_RECONNECT=TRUE");
+    public H2Db(JavaPlugin _plugin) {
+        this.plugin = _plugin;
+    }
 
-		cp = JdbcConnectionPool.create(fullDbName, "sa", "sa");
+    public void dbSetup(File dataFolder, String dbName) {
+        String fullDbName = dbName(dataFolder, dbName);
 
-		createMCUsersTable();
-		createLocationsTable();
+        fullDbName = fullDbName.concat(";AUTO_RECONNECT=TRUE");
 
-		log.info("database: {} opened", fullDbName);
-	}
+        cp = JdbcConnectionPool.create(fullDbName, "sa", "sa");
 
-	private void createLocationsTable() {
-		Connection conn = getConnection();
+        createMCUsersTable();
+        createLocationsTable();
 
-		Statement stat;
-		try {
-			stat = conn.createStatement();
-			stat.execute("""
-					create table if not exists locations
-					(id bigint generated always as identity primary key,
-					location geometry(pointz) not null,
-					mcuser bigint not null,
-					moment timestamp default current_timestamp not null,
-					foreign key(mcuser) references mcusers(id));""");
+        log.info("database: {} opened", fullDbName);
+    }
 
-			log.info("created locations table");
-		} catch (SQLException e) {
-			log.error("database create table locations failed: {}", e);
-		}
-	}
+    private void createLocationsTable() {
+        Connection conn = getConnection();
 
-	private void createMCUsersTable() {
-		Connection conn = getConnection();
+        Statement stat;
+        try {
+            stat = conn.createStatement();
+            boolean result = stat.execute("""
+                    create table if not exists locations
+                    (id bigint generated always as identity primary key,
+                    location geometry(pointz) not null,
+                    mcuser bigint not null,
+                    moment timestamp default current_timestamp not null,
+                    foreign key(mcuser) references mcusers(id));""");
 
-		Statement stat;
-		try {
-			stat = conn.createStatement();
-			stat.execute("""
-					create table if not exists mcusers
-					(id bigint generated always as identity primary key,
-					mcuser varchar(64) not null);""");
+            log.info("create locations table result: {}", result);
+        }
+        catch (SQLException e) {
+            log.error("database create table locations failed: {}", e);
+        }
+    }
 
-			log.info("created mcsers table");
-		} catch (SQLException e) {
-			log.error("database create table mcusers failed: {}", e);
-		}
-	}
+    private void createMCUsersTable() {
+        Connection conn = getConnection();
 
-	public void GetLocations(Player player) {
-		Connection conn = getConnection();
-	}
+        Statement stat;
+        try {
+            stat = conn.createStatement();
+            boolean result = stat.execute("""
+                    create table if not exists mcusers
+                    (id bigint generated always as identity primary key,
+                    mcuser varchar(64) not null);""");
 
-	public void shutdown() {
-		Connection conn = getConnection();
+            log.info("create mcsers table result: {}", result);
+        }
+        catch (SQLException e) {
+            log.error("database create table mcusers failed: {}", e);
+        }
+    }
 
-		try {
-			Statement stat = conn.createStatement();
-			stat.execute("SHUTDOWN");
-			stat.close();
-		} catch (SQLException e) {
-			log.error("database shutdown failed: {}", e);
-		}
+    public void GetLocations(Player player) {
+        Connection conn = getConnection();
+        
+        // add stuff here
+    }
 
-		try {
-			conn.close();
-		} catch (SQLException e) {
-			log.error("database connect close failed: {}", e);
-		}
-	}
+    public void shutdown() {
+        Connection conn = getConnection();
 
-	private static Connection getConnection() {
-		try {
-			return cp.getConnection();
-		} catch (SQLException e) {
-			log.error("database connect failed: {}", e);
+        try {
+            Statement stat = conn.createStatement();
+            stat.execute("SHUTDOWN");
+            stat.close();
+        }
+        catch (SQLException e) {
+            log.error("database shutdown failed: {}", e);
+        }
 
-			throw new RuntimeException(e);
-		}
-	}
+        try {
+            conn.close();
+        }
+        catch (SQLException e) {
+            log.error("database connect close failed: {}", e);
+        }
+        
+        cp.dispose();
+    }
 
-	private static String dbName(File dataFolder, String dbName) {
-		log.info("data folder name: {}", dataFolder.getName());
+    private Connection getConnection() {
+        try {
+            return cp.getConnection();
+        }
+        catch (SQLException e) {
+            log.error("database connect failed: {}", e);
 
-		String path;
+            throw new RuntimeException(e);
+        }
+    }
 
-		try {
-			path = dataFolder.getCanonicalPath();
-		} catch (IOException e) {
-			log.error("error getting data folder canonical path: {}", e);
+    private String dbName(File dataFolder, String dbName) {
+        log.info("data folder name: {}", dataFolder.getName());
 
-			throw new RuntimeException(e);
-		}
+        String path;
 
-		log.info("data folder path: {}", path);
+        try {
+            path = dataFolder.getCanonicalPath();
+        }
+        catch (IOException e) {
+            log.error("error getting data folder canonical path: {}", e);
 
-		if (!dataFolder.exists()) {
-			log.info("creating data folder: {}", path);
+            throw new RuntimeException(e);
+        }
 
-			if (!dataFolder.mkdir()) {
-				log.error("unable to create data folder");
-			}
-		}
+        log.info("data folder path: {}", path);
 
-		return db + path + File.separator + dbName;
-	}
+        if (!dataFolder.exists()) {
+            log.info("creating data folder: {}", path);
+
+            if (!dataFolder.mkdir()) {
+                log.error("unable to create data folder");
+            }
+        }
+
+        return db + path + File.separator + dbName;
+    }
 }

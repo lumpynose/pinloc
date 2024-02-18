@@ -1,6 +1,7 @@
 package com.objecteffects.pinloc.plugin;
 
 import java.io.File;
+
 import org.bukkit.command.PluginCommand;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -12,13 +13,18 @@ import com.objecteffects.pinloc.db.H2Db;
 public class PinLoc extends JavaPlugin implements Listener {
     private final static Logger log = LoggerFactory.getLogger("PinLoc");
 
+    private H2Db h2db;
+
     @Override
     public void onEnable() {
         log.info("onEnable");
 
+        h2db = new H2Db(this);
+        
         File dataFolder = getDataFolder();
 
-        (new H2Db()).dbSetup(dataFolder, "PinLoc");
+        h2db.dbSetup(dataFolder, "PinLoc");
+        
         new LoginEventHandler(this);
 
         PluginCommand cmd = getCommand("pinloc");
@@ -32,6 +38,6 @@ public class PinLoc extends JavaPlugin implements Listener {
     public void onDisable() {
         log.info("onDisable");
 
-        (new H2Db()).shutdown();
+        h2db.shutdown();
     }
 }

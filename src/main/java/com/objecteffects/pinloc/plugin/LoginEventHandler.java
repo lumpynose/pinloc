@@ -14,13 +14,15 @@ import org.slf4j.LoggerFactory;
 public class LoginEventHandler implements Listener {
 	private final static Logger log = LoggerFactory.getLogger("PinLoc");
 	
-	private final static Set<Player> playerList = new HashSet<Player>();
-	private final JavaPlugin plugin;
+    @SuppressWarnings("unused")
+    private final JavaPlugin plugin;
+
+    private final static Set<Player> playerList = new HashSet<Player>();
 
 	public LoginEventHandler(JavaPlugin _plugin) {
+        _plugin.getServer().getPluginManager().registerEvents(this, _plugin);
+
 	    this.plugin = _plugin;
-	    
-        this.plugin.getServer().getPluginManager().registerEvents(this, this.plugin);
 	}
 	
 	@EventHandler
