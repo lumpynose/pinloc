@@ -33,4 +33,8 @@ public class PinLocCommand implements CommandExecutor {
 
 		return false;
 	}
+
+    private void doNothing() {
+        // nothing
+    }
 }

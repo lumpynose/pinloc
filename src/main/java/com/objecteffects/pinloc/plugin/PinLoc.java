@@ -34,6 +34,10 @@ public class PinLoc extends JavaPlugin implements Listener {
         cmd.setExecutor(new PinLocCommand(this));
     }
 
+    private void doNothing() {
+        // nothing
+    }
+    
     @Override
     public void onDisable() {
         log.info("onDisable");

@@ -8,7 +8,7 @@
 	<name>Pin Location</name>
 
 	<properties>
-		<plugin.finalName>${artifactId}</plugin.finalName>
+		<plugin.finalName>${project.artifactId}</plugin.finalName>
 		<java.version>17</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.report.sourceEncoding>UTF-8</project.report.sourceEncoding>

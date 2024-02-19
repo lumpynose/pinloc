@@ -24,7 +24,11 @@ public class LoginEventHandler implements Listener {
 
 	    this.plugin = _plugin;
 	}
-	
+
+    private void doNothing() {
+        // nothing
+    }
+    
 	@EventHandler
 	public void onLogin(PlayerLoginEvent event) {
 		playerList.add(event.getPlayer());
